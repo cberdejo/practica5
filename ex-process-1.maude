@@ -1,13 +1,16 @@
-sload bpmn-no-msgs.maude 
+sload bpmn.maude 
 ---- bpmn.maude is the name of the file in which the BPMN-SEM module is defined. 
 ---- bpmn-no-msgs.maude  is the name of the file with the spec without messages/events
 
-mod BPMN-EX is
-  pr BPMN-SEM . ---- module with the semantics of BPMN
+load time
 
-  op o : -> Oid .
-  op PROCESS : -> Object .
-  eq PROCESS 
+mod BPMN-EX is
+
+	pr BPMN-SEM . ---- module with the semantics of BPMN
+
+	op o : -> Oid .
+	op PROCESS : -> Object .
+	eq PROCESS 
     = < o : Process | 
         nodes: (start(id("00"), id("01")),
                 task(id("02"), "Sign in", id("01"), id("03"), 2, empty),
