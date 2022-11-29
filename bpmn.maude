@@ -1,11 +1,15 @@
 load time.maude
-*** FMODS
+----------------------------------------------------------------------------------------
 fmod ID is 
   pr STRING .
   sort Id .
   op id : String -> Id [ctor] .
 endfm 
 
+view Id from TRIV to ID is 
+    sort Elt to Id .
+endv
+----------------------------------------------------------------------------------------
 fmod FLOW is 
   pr ID .
   pr POSRAT-TIME-DOMAIN-WITH-INF .
@@ -15,6 +19,10 @@ fmod FLOW is
  
 endfm 
 
+view Flow from TRIV to FLOW is 
+    sort Elt to Flow .
+endv
+----------------------------------------------------------------------------------------
 fmod TOKEN is
   pr ID .
   pr POSRAT-TIME-DOMAIN-WITH-INF .
@@ -23,12 +31,28 @@ fmod TOKEN is
   
 endfm
 
+view Token from TRIV to TOKEN is 
+    sort Elt to Token .
+endv
+----------------------------------------------------------------------------------------
 fmod RESOURCE is
     pr ID .
     sort Resource .
     op resource : Id Nat Nat -> Resource [ctor] .
     
 endfm
+
+view Resource from TRIV to RESOURCE is 
+    sort Elt to Resource .
+endv
+
+----------------------------------------------------------------------------------------
+fmod GATEWAY is
+    sort Gateway .
+    op exclusive : -> Gateway [ctor] .
+    op parallel : -> Gateway [ctor] .
+endfm
+----------------------------------------------------------------------------------------
 
 fmod NODE is 
   pr SET{Id} .
@@ -46,39 +70,16 @@ fmod NODE is
 
 endfm
 
-fmod GATEWAY is
-    sort Gateway .
-    op exclusive : -> Gateway [ctor] .
-    op parallel : -> Gateway [ctor] .
-endfm
-
-**** VISTAS
-view Flow from TRIV to FLOW is 
-    sort Elt to Flow .
-endv
-
-view Id from TRIV to ID is 
-    sort Elt to Id .
-endv
-
-view Resource from TRIV to RESOURCE is 
-    sort Elt to Resource .
-endv
-
-view Token from TRIV to TOKEN is 
-    sort Elt to Token .
-endv
-
 view Node from TRIV to NODE is 
     sort Elt to Node .
 endv
-
-
+----------------------------------------------------------------------------------------
 
 
 mod BPMPN-SEM is 
     pr POSRAT-TIME-DOMAIN-WITH-INF .
-   
+    pr STRING .
+
     pr SET{Flow} .
     pr SET{Id} .
     pr SET{Resource} .
@@ -87,7 +88,7 @@ mod BPMPN-SEM is
 
     inc CONFIGURATION .
     sort  Process .
-    subsort Node < Cid .
+    subsort Process < Cid .
 
     ---- class Process | nodes: Set{Node}, flows: Set{Flow}, tokens: Set{Token}, gtime: Time, resources: Set{Resource} .
     op Process : -> Process .
@@ -97,4 +98,36 @@ mod BPMPN-SEM is
     op gtime:_ : Time -> Attribute [gather (&)] .
     op resource:_ : Set{Resource} ->  Attribute [gather (&)] . 
 
+    vars O : Oid .
+    var N : Node .
+    var VProcess : Process .
+    vars T1 T2 T3 : Time .
+    var Atts : AttributeSet .
+    var Conf : Configuration .
+    var TOKEN : Token .
+    var id1 id2 id3 id4 : Id .
+    var NodeSet : Set{Node} .
+    var FlowNode : Set{Flow} .
+    var TokenSet : Set{Token} .
+    var TaskName : String .
+    var IdSet : Set{Id} .
+    var ResourceSet : Set{Resource} .
+
+   
+
+    
+    
+   rl [startSession] :  < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: 0, Atts > 
+   => < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id2,T1 ), TokenSet), gtime: 0, Atts > .
+
+  
+    ***token temporizador a 0, falta comprobar tiene el conjunto de recursos disponible (crl) 
+   rl [enterTask] : < O : Process | nodes: (task(  id1, TaskName, id2, id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,0 ), TokenSet), gtime: T3, resources: ResourceSet > 
+   =>  < O : Process | nodes: (task( id1, TaskName, id2 ,id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id1,T1 ), TokenSet), gtime: T3, resources: ResourceSet > .
+
+  rl [enterFlowFromTask] :  < O : Process | nodes: (task(  id1 ,TaskName, id2, id3, T1, IdSet ),NodeSet), flows: (flow(id3, T2), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: T3, Atts > 
+   =>  < O : Process | nodes: (task( id1,TaskName,id2 ,id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,T2 ), TokenSet), gtime: T3, Atts > .
+   
+  rl [enterEnd] :  < O : Process | nodes: (end( id1,id2 ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,0 ), TokenSet), gtime: T3, Atts > 
+   =>  < O : Process | nodes: (end(id1,id2),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: T3, Atts > .
 endm 
