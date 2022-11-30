@@ -22,4 +22,5 @@ mod BPMN-EX is
         resources: empty > .
 endm
 
-rew PROCESS .
+rew  PROCESS .
+search PROCESS =>! < o : Process | Atts:AttributeSet > .

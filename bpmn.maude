@@ -76,7 +76,7 @@ endv
 ----------------------------------------------------------------------------------------
 
 
-mod BPMPN-SEM is 
+mod BPMN-SEM is 
     pr POSRAT-TIME-DOMAIN-WITH-INF .
     pr STRING .
 
@@ -100,7 +100,6 @@ mod BPMPN-SEM is
 
     vars O : Oid .
     var N : Node .
-    var VProcess : Process .
     vars T1 T2 T3 : Time .
     var Atts : AttributeSet .
     var Conf : Configuration .
@@ -113,8 +112,25 @@ mod BPMPN-SEM is
     var IdSet : Set{Id} .
     var ResourceSet : Set{Resource} .
 
-       
-    
+    ---Debería utilizarse Timeinf?
+    op delta : Set{Token} Time -> Set{Token} .
+    eq delta (empty,T1) = empty .
+    ceq delta ((token(id1,T1),TokenSet),T2) = (token(id1,T1 monus T2 ),delta(TokenSet,T2)) if T1 gt T2 . ---No se si monus equivale a resta
+    eq delta ((token(id1,T1),TokenSet),T2) = (token(id1,0),delta(TokenSet,T2))[owise] . ---Se supone que no vamos a tener nunca un valor que pueda dar negativo en el cronometro
+
+     ---Debería utilizarse Timeinf?
+      ---Lo que he pensado de momento, es que el mte será igual al tiempo mínimo de los temporizadores de los tokens
+    op mte : Set{Token}  -> Time .
+    eq mte ( (token(id1,T1),token(id2,T2) ) ) = minimum(T1,T2) . ---creo que en time.maude existe una operación minimum
+    eq mte ((token(id1,T1),token(id2,T2),TokenSet)) = minimum(T1,minimum(T2,mte(TokenSet))) .
+
+
+  ---no funcina tick
+  crl [tick] :
+      < O : Process | gtime: T1, tokens: TokenSet, Atts >
+      => < O : Process | gtime: T1 + T2, tokens: delta(TokenSet,T2), Atts >
+  if T2 := mte(TokenSet) /\ 0 < T2  .
+  
   rl [startSession] :  < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: 0, Atts > 
   => < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id2,T1 ), TokenSet), gtime: 0, Atts > .
 
