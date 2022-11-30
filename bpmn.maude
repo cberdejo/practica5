@@ -96,7 +96,7 @@ mod BPMPN-SEM is
     op flows:_ : Set{Flow} -> Attribute [gather (&)] .
     op tokens:_ : Set{Token} -> Attribute [gather (&)] .
     op gtime:_ : Time -> Attribute [gather (&)] .
-    op resource:_ : Set{Resource} ->  Attribute [gather (&)] . 
+    op resources:_ : Set{Resource} ->  Attribute [gather (&)] . 
 
     vars O : Oid .
     var N : Node .
@@ -113,21 +113,18 @@ mod BPMPN-SEM is
     var IdSet : Set{Id} .
     var ResourceSet : Set{Resource} .
 
-   
-
+       
     
-    
-   rl [startSession] :  < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: 0, Atts > 
-   => < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id2,T1 ), TokenSet), gtime: 0, Atts > .
+  rl [startSession] :  < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: 0, Atts > 
+  => < O : Process | nodes: (start(id1,id2),NodeSet), flows: (flow(id2, T1), FlowNode), tokens: (token( id2,T1 ), TokenSet), gtime: 0, Atts > .
 
-  
     ***token temporizador a 0, falta comprobar tiene el conjunto de recursos disponible (crl) 
-   rl [enterTask] : < O : Process | nodes: (task(  id1, TaskName, id2, id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,0 ), TokenSet), gtime: T3, resources: ResourceSet > 
-   =>  < O : Process | nodes: (task( id1, TaskName, id2 ,id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id1,T1 ), TokenSet), gtime: T3, resources: ResourceSet > .
+  rl [enterTask] : < O : Process | nodes: (task(  id1, TaskName, id2, id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,0 ), TokenSet), gtime: T3, resources: ResourceSet > 
+  =>  < O : Process | nodes: (task( id1, TaskName, id2 ,id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id1,T1 ), TokenSet), gtime: T3,  resources: ResourceSet > .
 
   rl [enterFlowFromTask] :  < O : Process | nodes: (task(  id1 ,TaskName, id2, id3, T1, IdSet ),NodeSet), flows: (flow(id3, T2), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: T3, Atts > 
-   =>  < O : Process | nodes: (task( id1,TaskName,id2 ,id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,T2 ), TokenSet), gtime: T3, Atts > .
-   
+  =>  < O : Process | nodes: (task( id1,TaskName,id2 ,id3 ,T1 ,IdSet ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,T2 ), TokenSet), gtime: T3, Atts > .
+
   rl [enterEnd] :  < O : Process | nodes: (end( id1,id2 ),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id2,0 ), TokenSet), gtime: T3, Atts > 
-   =>  < O : Process | nodes: (end(id1,id2),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: T3, Atts > .
+  =>  < O : Process | nodes: (end(id1,id2),NodeSet), flows: (flow(id2, T2), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: T3, Atts > .
 endm 
