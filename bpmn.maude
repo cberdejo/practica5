@@ -100,6 +100,7 @@ mod BPMN-SEM is
 
     vars O : Oid .
     var N : Node .
+    var N1,N2,N3 : Nat .
     vars T1 T2 T3 : Time .
     var Atts : AttributeSet .
     var Conf : Configuration .
@@ -111,6 +112,20 @@ mod BPMN-SEM is
     var TaskName : String .
     var IdSet : Set{Id} .
     var ResourceSet : Set{Resource} .
+    var R : Resource .
+
+
+   op isResourceAvalible : Id Set{Resource} -> Bool .
+   eq isResourceAvalible (Id1,empty) = false . --- no lo encuentra, por tanto es falso
+   eq isResourceAvalible(Id1,(resource(Id1,n2,n3),ResourceSet)) = if n3 > 1 then true else false fi. ---lo encuentra
+   eq isResourceAvalible(Id1,(R,ResourceSet)) = isResourceAvalible(Id1,ResourceSet) [owise]. --- si el id no es el mismo, busca el siguiente
+
+    ***repasar
+    op hasAvaliableResources :  -> Bool .
+    eq hasAvaliableResources ((id1,IdSet), ResourceSet) = isResourceAvalible(id1,ResourceSet) and hasAvaliableResources(IdSet,ResourceSet) . ---true si tiene ese recurso y el resto
+    eq hasAvaliableResources (IdSet,ResourceSet) = true [owise] . --- IdSet == empty = true
+
+    op reduceResources : Set{Id} Set{Resource} -> Set{Resource}.
 
     op delta : Set{Token} Time -> Set{Token} .
     eq delta (empty, T1) = empty .
@@ -137,6 +152,7 @@ mod BPMN-SEM is
 		flows: (flow(id2, T2), FlowNode), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
 	=> < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
 		flows: (flow(id2, T2), FlowNode), tokens: (token(id1, T1), TokenSet), gtime: T3, resources: ResourceSet > .
+    
 
 	rl [enterFlowFromTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
 		flows: (flow(id3, T2), FlowNode), tokens: (token(id1, 0), TokenSet), gtime: T3, Atts > 

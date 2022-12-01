@@ -23,7 +23,7 @@ mod BPMN-EX is
 endm
 
 ---rew  PROCESS .
----search PROCESS =>! < o : Process | Atts:AttributeSet > .
+search PROCESS =>! < o : Process | Atts:AttributeSet > .
 
 --- SEARCH PARA COMPROBAR QUE SE HAGA TICK EN ALGÚN MOMENTO | LO HACE BIEN
 ---search PROCESS =>* < o : Process | gtime: n:Nat , Atts:AttributeSet > s.t. n:Nat > 0 .
@@ -35,4 +35,4 @@ endm
 ---search PROCESS =>* < o : Process | tokens: token(id("02"), 2), Atts:AttributeSet > .
 
 --- SEARCH PARA COMPROBAR QUE TERMINA | LO HACE BIEN
-search PROCESS =>* < o : Process | tokens: token(id("04"), 0), Atts:AttributeSet > .
+---search PROCESS =>* < o : Process | tokens: token(id("04"), 0), Atts:AttributeSet > .
