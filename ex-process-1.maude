@@ -25,11 +25,14 @@ endm
 ---rew  PROCESS .
 ---search PROCESS =>! < o : Process | Atts:AttributeSet > .
 
---- SEARCH PARA COMPROBAR QUE SE HAGA TICK EN ALGÚN MOMENTO | POR AHORA FALLA
+--- SEARCH PARA COMPROBAR QUE SE HAGA TICK EN ALGÚN MOMENTO | LO HACE BIEN
 ---search PROCESS =>* < o : Process | gtime: n:Nat , Atts:AttributeSet > s.t. n:Nat > 0 .
 
 --- SEARCH PARA COMPROBAR QUE SE PASA AL PRIMER FLOW | LO HACE BIEN
 ---search PROCESS =>* < o : Process | tokens: token(id("01"), 2), Atts:AttributeSet > .
 
---- SEARCH PARA COMPROBAR QUE SE PASA A LA PRIMERA TASK | POR AHORA FALLA
+--- SEARCH PARA COMPROBAR QUE SE PASA A LA PRIMERA TASK | LO HACE BIEN
 ---search PROCESS =>* < o : Process | tokens: token(id("02"), 2), Atts:AttributeSet > .
+
+--- SEARCH PARA COMPROBAR QUE TERMINA | LO HACE BIEN
+search PROCESS =>* < o : Process | tokens: token(id("04"), 0), Atts:AttributeSet > .

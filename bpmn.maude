@@ -65,7 +65,7 @@ fmod NODE is
 	op start : Id Id -> Node [ctor] .
 	op end : Id Id -> Node [ctor] .
 	op task : Id String Id Id Time Set{Id} -> Node [ctor] .
-	op split : Id  Gateway Id Set{Id} -> Node [ctor] .
+	op split : Id Gateway Id Set{Id} -> Node [ctor] .
 	op merge : Id Gateway Set{Id} Id -> Node [ctor] .
 
 endfm
@@ -87,7 +87,7 @@ mod BPMN-SEM is
     pr SET{Token} .
 
     inc CONFIGURATION .
-    sort  Process .
+    sort Process .
     subsort Process < Cid .
 
     ---- class Process | nodes: Set{Node}, flows: Set{Flow}, tokens: Set{Token}, gtime: Time, resources: Set{Resource} .
@@ -96,7 +96,7 @@ mod BPMN-SEM is
     op flows:_ : Set{Flow} -> Attribute [gather (&)] .
     op tokens:_ : Set{Token} -> Attribute [gather (&)] .
     op gtime:_ : Time -> Attribute [gather (&)] .
-    op resources:_ : Set{Resource} ->  Attribute [gather (&)] . 
+    op resources:_ : Set{Resource} -> Attribute [gather (&)] . 
 
     vars O : Oid .
     var N : Node .
@@ -112,43 +112,39 @@ mod BPMN-SEM is
     var IdSet : Set{Id} .
     var ResourceSet : Set{Resource} .
 
-    ---Debería utilizarse Timeinf?
     op delta : Set{Token} Time -> Set{Token} .
-    eq delta (empty,T1) = empty .
-    ceq delta ((token(id1,T1),TokenSet),T2) = (token(id1,T1 monus T2 ),delta(TokenSet,T2)) if T1 gt T2 . ---No se si monus equivale a resta
-    eq delta ((token(id1,T1),TokenSet),T2) = (token(id1,0),delta(TokenSet,T2))[owise] . ---Se supone que no vamos a tener nunca un valor que pueda dar negativo en el cronometro
+    eq delta (empty, T1) = empty .
+    ceq delta ((token(id1, T1),TokenSet), T2) = (token(id1, T1 monus T2), delta(TokenSet, T2)) if T1 gt T2 . ---No se si monus equivale a resta
+    eq delta ((token(id1, T1), TokenSet), T2) = (token(id1, 0), delta(TokenSet, T2)) [owise] . ---Se supone que no vamos a tener nunca un valor que pueda dar negativo en el cronometro
 
-     ---Debería utilizarse Timeinf?
-      ---Lo que he pensado de momento, es que el mte será igual al tiempo mínimo de los temporizadores de los tokens
-    op mte : Set{Token}  -> Time .
-    eq mte ( (token(id1,T1),token(id2,T2) ) ) = minimum(T1,T2) . ---creo que en time.maude existe una operación minimum
-    eq mte ((token(id1,T1),token(id2,T2),TokenSet)) = minimum(T1,minimum(T2,mte(TokenSet))) .
+    --- Solo hay un token
+    op mte : Set{Token} -> TimeInf .
+    eq mte ((token(id1, T1), TokenSet)) = T1 .
 
 
-  	---no funcina tick
 	crl [tick] :
-    	< O : Process | gtime: T1, tokens: TokenSet, Atts >
-    	=> < O : Process | gtime: T1 + T2, tokens: delta(TokenSet,T2), Atts >
-	if T2 := mte(TokenSet) /\ 0 < T2  .
+    	< O : Process | gtime: T1, tokens: (token(id1, T3), TokenSet), Atts >
+    	=> < O : Process | gtime: T1 + T2, tokens: delta((token(id1, T3), TokenSet), T2), Atts >
+	if T2 := mte((token(id1, T3), TokenSet)) /\ 0 < T2 .
   
-	rl [startSession] :  < O : Process | nodes: (start(id1,id2),NodeSet), 
-		flows: (flow(id2, T1), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: 0, Atts > 
-	=> < O : Process | nodes: (start(id1,id2),NodeSet), 
-		flows: (flow(id2, T1), FlowNode), tokens: (token( id2,T1 ), TokenSet), gtime: 0, Atts > .
+	rl [startSession] : < O : Process | nodes: (start(id1, id2), NodeSet), 
+		flows: (flow(id2, T1), FlowNode), tokens: (token(id1, 0), TokenSet), gtime: 0, Atts > 
+	=> < O : Process | nodes: (start(id1, id2), NodeSet), 
+		flows: (flow(id2, T1), FlowNode), tokens: (token(id2, T1), TokenSet), gtime: 0, Atts > .
 
 	***token temporizador a 0, falta comprobar tiene el conjunto de recursos disponible (crl)
-	rl [enterTask] : < O : Process | nodes: (task(  id1, TaskName, id2, id3 ,T1 ,IdSet ),NodeSet), 
-		flows: (flow(id2, T2), FlowNode), tokens: (token( id2,0 ), TokenSet), gtime: T3, resources: ResourceSet > 
-	=>  < O : Process | nodes: (task( id1, TaskName, id2 ,id3 ,T1 ,IdSet ),NodeSet), 
-		flows: (flow(id2, T2), FlowNode), tokens: (token( id1,T1 ), TokenSet), gtime: T3,  resources: ResourceSet > .
+	rl [enterTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
+		flows: (flow(id2, T2), FlowNode), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
+	=> < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
+		flows: (flow(id2, T2), FlowNode), tokens: (token(id1, T1), TokenSet), gtime: T3, resources: ResourceSet > .
 
-	rl [enterFlowFromTask] :  < O : Process | nodes: (task(  id1 ,TaskName, id2, id3, T1, IdSet ),NodeSet), 
-		flows: (flow(id3, T2), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: T3, Atts > 
-	=>  < O : Process | nodes: (task( id1,TaskName,id2 ,id3 ,T1 ,IdSet ),NodeSet), 
-		flows: (flow(id2, T2), FlowNode), tokens: (token( id2,T2 ), TokenSet), gtime: T3, Atts > .
+	rl [enterFlowFromTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
+		flows: (flow(id3, T2), FlowNode), tokens: (token(id1, 0), TokenSet), gtime: T3, Atts > 
+	=> < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
+		flows: (flow(id3, T2), FlowNode), tokens: (token(id3, T2), TokenSet), gtime: T3, Atts > .
 
-  	rl [enterEnd] :  < O : Process | nodes: (end( id1,id2 ),NodeSet), 
-		flows: (flow(id2, T2), FlowNode), tokens: (token( id2,0 ), TokenSet), gtime: T3, Atts > 
-  	=>  < O : Process | nodes: (end(id1,id2),NodeSet), 
-		flows: (flow(id2, T2), FlowNode), tokens: (token( id1,0 ), TokenSet), gtime: T3, Atts > .
+  	rl [enterEnd] : < O : Process | nodes: (end(id1, id2), NodeSet), 
+		flows: (flow(id2, T2), FlowNode), tokens: (token(id2, 0), TokenSet), gtime: T3, Atts > 
+  	=> < O : Process | nodes: (end(id1, id2), NodeSet), 
+		flows: (flow(id2, T2), FlowNode), tokens: (token(id1, 0), TokenSet), gtime: T3, Atts > .
 endm 
