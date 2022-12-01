@@ -117,9 +117,9 @@ mod BPMN-SEM is
     ceq delta ((token(id1, T1),TokenSet), T2) = (token(id1, T1 monus T2), delta(TokenSet, T2)) if T1 gt T2 . ---No se si monus equivale a resta
     eq delta ((token(id1, T1), TokenSet), T2) = (token(id1, 0), delta(TokenSet, T2)) [owise] . ---Se supone que no vamos a tener nunca un valor que pueda dar negativo en el cronometro
 
-    --- Solo hay un token
     op mte : Set{Token} -> TimeInf .
-    eq mte ((token(id1, T1), TokenSet)) = T1 .
+    eq mte ((token(id1, T1), empty)) = T1 .
+    eq mte ((token(id1, T1), (token(id2, T2), TokenSet))) = minimum(T1, mte((token(id2, T2), TokenSet))) .
 
 
 	crl [tick] :
