@@ -26,3 +26,5 @@ mod BPMN-EX is
         resources: empty > .
 endm
 
+--- SEARCH PARA COMPROBAR QUE TERMINA | LO HACE BIEN
+search [5, 50] PROCESS =>! < o : Process | Atts:AttributeSet > .
