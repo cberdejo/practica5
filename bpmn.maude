@@ -165,15 +165,15 @@ mod BPMN-SEM is
   	=> < O : Process | nodes: (end(id1, id2), NodeSet), 
 		flows: (flow(id2, T2), FlowNode), tokens: (token(id1, 0), TokenSet), gtime: T3, Atts > .
 
-    --- Or input
-    crl [merge] : < O : Process | nodes: (merge(id1, exclusive, (id2, id3), id4), NodeSet), 
+    --- Or with multiple inputs
+    crl [exclusiveMerge] : < O : Process | nodes: (merge(id1, exclusive, (id2, id3), id4), NodeSet), 
 		flows: (flow(id5, T1), flow(id4, T2), FlowNode), tokens: (token(id5, 0), TokenSet), gtime: T3, resources: ResourceSet > 
 	=> < O : Process | nodes: (merge(id1, exclusive, (id2, id3), id4), NodeSet), 
 		flows: (flow(id5, T1), flow(id4, T2), FlowNode), tokens: (token(id4, T2), TokenSet), gtime: T3, resources: ResourceSet > 
     if id5 == id2 or id5 == id3 .
 
-    --- Or output
-    crl [split] : < O : Process | nodes: (split(id1, exclusive, id2, (id3, id4)), NodeSet), 
+    --- Or with multiple outputs
+    crl [exclusiveSplit] : < O : Process | nodes: (split(id1, exclusive, id2, (id3, id4)), NodeSet), 
 		flows: (flow(id2, T1), flow(id5, T2), FlowNode), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
 	=> < O : Process | nodes: (split(id1, exclusive, id2, (id3, id4)), NodeSet), 
 		flows: (flow(id2, T1), flow(id5, T2), FlowNode), tokens: (token(id5, T2), TokenSet), gtime: T3, resources: ResourceSet > 
