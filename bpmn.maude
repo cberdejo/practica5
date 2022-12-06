@@ -166,18 +166,34 @@ mod BPMN-SEM is
  ***************************************************************************************************************************************
   ---RECURSOS
  ***************************************************************************************************************************************
-   op isResourceAvalible : Id Set{Resource} -> Bool .
-   eq isResourceAvalible (id1,empty) = false . --- no lo encuentra, por tanto es falso
-   eq isResourceAvalible(id1,(resource(id1,N2,N3),ResourceSet)) = if N3 > 1 then true else false fi .  ---lo encuentra
-   eq isResourceAvalible(id1,(R,ResourceSet)) = isResourceAvalible(id1,ResourceSet) [owise]. --- si el id no es el mismo, busca el siguiente
 
-    ***repasar
     
+    ---auxiliar
+   op isResourceAvalible : Id Set{Resource} -> Bool .
+   eq isResourceAvalible (id1,empty) = false . 
+   eq isResourceAvalible(id1,(resource(id1,N2,N3),ResourceSet)) = if N3 >= 1 then true else false fi .  
+   eq isResourceAvalible(id1,(R,ResourceSet)) = isResourceAvalible(id1,ResourceSet) [owise]. 
+
+   ---prueba: red isResourceAvalible( (id("01")), (resource(id("00"), 1, 0), resource(id("01"), 1, 1), resource(id("02"), 1, 1)) ) .
+
+    ---comprueba que  tenga los recursos necesarios usando una función auxiliar
     op hasAvaliableResources : Set{Id} Set{Resource} -> Bool .
     eq hasAvaliableResources ((id1,IdSet), ResourceSet) = isResourceAvalible(id1,ResourceSet) and hasAvaliableResources(IdSet,ResourceSet) . ---true si tiene ese recurso y el resto
     eq hasAvaliableResources (IdSet,ResourceSet) = true [owise] . --- IdSet == empty = true
     
+    ---prueba: red hasAvaliableResources( (id("00"),id("01"),id("02")), (resource(id("00"), 1, 1), resource(id("01"), 1, 0), resource(id("02"), 1, 1)) ) .
+    
+    ---resta 1 a todos los recursos que estén del set de Id
     op reduceResources : Set{Id} Set{Resource} -> Set{Resource}.
+    eq reduceResources (IdSet, empty) = empty .
+    eq reduceResources (IdSet, (resource(id1,N1, s N2),ResourceSet)) =
+    if id1 in IdSet then
+        resource(id1,N1, N2), reduceResources(IdSet,ResourceSet)
+    else 
+        resource(id1,N1, s N2), reduceResources(IdSet,ResourceSet) 
+    fi .
+    ---no probado
+   
 
 ***************************************************************************************************************************************
     ---TICK
@@ -205,11 +221,12 @@ mod BPMN-SEM is
 		flows: (flow(id2, T1), FlowSet), tokens: (token(id2, T1), TokenSet), gtime: 0, Atts > .
 
 	***token temporizador a 0, falta comprobar tiene el conjunto de recursos disponible (crl)
-	rl [enterTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
+	crl [enterTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
 		flows: (flow(id2, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
 	=> < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
-		flows: (flow(id2, T2), FlowSet), tokens: (token(id1, T1), TokenSet), gtime: T3, resources: ResourceSet > .
-    
+		flows: (flow(id2, T2), FlowSet), tokens: (token(id1, T1), TokenSet), gtime: T3, resources: reduceResources(IdSet,ResourceSet) >
+        if hasAvaliableResources(idSet,ResourceSet) .
+
 
 	rl [enterFlowFromTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
 		flows: (flow(id3, T2), FlowSet), tokens: (token(id1, 0), TokenSet), gtime: T3, Atts > 
@@ -246,7 +263,7 @@ mod BPMN-SEM is
     rl [ParallelSplit] :  < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
 		flows: (flow(id2, T1),  FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
 	=> < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
-		flows: (flow(id2, T1), FlowSet), tokens: (tokenParaCadaFlow(IdSet,FlowSet), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id2, T1), FlowSet), tokens: (tokenParaCadaFlow(IdSet,FlowSet), TokenSet), gtime: T3, resources: ResourceSet > .
     
 
 
