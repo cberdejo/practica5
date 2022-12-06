@@ -113,6 +113,7 @@ mod BPMN-SEM is
     var IdSet : Set{Id} .
     var ResourceSet : Set{Resource} .
     var R : Resource .
+   
 
 ***************************************************************************************************************************************
   ---MERGE PARALLEL
@@ -127,7 +128,7 @@ mod BPMN-SEM is
             TokenSetInIdIsReady(TokenSet, IdSet)
         fi .
     
-    ***prueba     red TokenSetInIdIsReady((token(id("00"),0), token(id("01"),0), token(id("02"),0)),(id("00"),id("01"),id("02"))) .
+    ---prueba: red TokenSetInIdIsReady((token(id("00"),0), token(id("01"),0), token(id("02"),0)),(id("00"),id("01"),id("02"))) .
 
     ---Debe eliminarse todos los tokens menos que pertenezcan al idSet
     op deleteTokensInIdSet : Set{Token} Set{Id} -> Set{Token} .
@@ -139,22 +140,29 @@ mod BPMN-SEM is
             (token(id1, T1) , deleteTokensInIdSet (TokenSet,IdSet))
         fi .
 
-    ***prueba     red deleteTokensInIdSet((token(id("00"),0), token(id("03"),0), token(id("02"),0), token(id("06"),0)),(id("00"),id("01"),id("02"))) .
+    ---prueba: red deleteTokensInIdSet((token(id("00"),0), token(id("03"),0), token(id("02"),0), token(id("06"),0)),(id("00"),id("01"),id("02"))) .
 ***************************************************************************************************************************************
   ---SPLIT PARALLEL
 ***************************************************************************************************************************************
-    ----NO FUNCIONA ESTO 
-    --- se busca el tiempo de un flow dado un Id
-    op tokenParaCadaFlow : Set{Flow} Id -> Time .
-    eq tokenParaCadaFlow (empty,id1) = 0 . ---caso no posible
-    eq tokenParaCadaFlow (flow(id1,T1),id1) = T1 .
-    eq tokenParaCadaFlow ((flow(id1,T1),FlowSet),id2) =  tokenParaCadaFlow(FlowSet,id2) [owise] .
-    ---un token por cada flow inicializado.
-    op tokenParaCadaFlow () : Set{Id} Set{Flow} -> Set{Token} .
+    
+    --- se busca el tiempo de un flow dado un Id   
+    op findTimeFromFlowSet : Set{Flow} Id -> Time .
+    eq findTimeFromFlowSet (empty, id1) = 0 . --- no posible
+    eq findTimeFromFlowSet (flow(id1,T1),id1) = T1 .
+    ceq findTimeFromFlowSet ((flow(id2,T1),FlowSet),id1)  =  findTimeFromFlowSet(FlowSet,id1) if id2 =/= id1 .
+    ---prueba: red findTimeFromFlowSet ((flow(id("00"),15),  flow(id("01"),20), flow(id("02"),10)), id("01")) .
+  
+  
+    ---un token por cada flow inicializado el temporizador.
+    op tokenParaCadaFlow : Set{Id} Set{Flow} -> Set{Token} .
     eq tokenParaCadaFlow (empty,FlowSet) = empty .
-    eq tokenParaCadaFlow((id1,IdSet),FlowSet) = token(id1,findTimeFromFlowSet(FlowSet,id1)), tokenParaCadaFlow(idSet,FlowSet) .
+    eq tokenParaCadaFlow((id1,IdSet),FlowSet) = token(id1,findTimeFromFlowSet(FlowSet,id1)), tokenParaCadaFlow(IdSet,FlowSet) .
 
-    ---prueba red tokenParaCadaFlow( (id("00"),id("01"),id("02")), (flow(id("00"),15),  flow(id("01"),20), flow(id("02"),30)) ) .
+   ---prueba red tokenParaCadaFlow( (id("00"),id("01"),id("02")), (flow(id("00"),15),  flow(id("01"),20), flow(id("02"),30),flow(id("04"),30) ) ) .
+
+
+
+
  ***************************************************************************************************************************************
   ---RECURSOS
  ***************************************************************************************************************************************
@@ -234,7 +242,7 @@ mod BPMN-SEM is
 		flows: (flow(id2, T1), flow(id4, T2), FlowSet), tokens: (token(id4, T2), deleteTokensInIdSet(TokenSet,IdSet)), gtime: T3, resources: ResourceSet > 
     if TokenSetInIdIsReady((token(id2, 0), TokenSet), IdSet) . 
 
-    ---and output
+        ---and output
     rl [ParallelSplit] :  < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
 		flows: (flow(id2, T1),  FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
 	=> < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
