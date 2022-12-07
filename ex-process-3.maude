@@ -70,3 +70,5 @@ mod BPMN-EX is
                     resource(id("car"), 1, 1), 
                     resource(id("drone"), 1, 1)) > .
 endm
+
+search [3, 20] PROCESS =>! < o : Process | Atts:AttributeSet > .
