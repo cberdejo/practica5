@@ -192,9 +192,9 @@ mod BPMN-SEM is
     else 
         resource(id1, N1, s N2), reduceResources(IdSet, ResourceSet) 
     fi .
-    ---no probado
-    --- pero creo que esta bien
-   
+
+    ---prueba red reduceResources ((id("00"), id("01"), id("02")),(resource(id("00"), 1, 1), resource(id("01"), 1, 0), resource(id("02"),1,2),resource(id("03"),1,2)))
+    
 
 ***************************************************************************************************************************************
     ---TICK
