@@ -185,6 +185,7 @@ mod BPMN-SEM is
     ---resta 1 a todos los recursos que estén en el set de Id
     op reduceResources : Set{Id} Set{Resource} -> Set{Resource}.
     eq reduceResources (IdSet, empty) = empty .
+    eq reduceResources (IdSet, (resource(id1, N1, 0), ResourceSet)) = resource(id1, N1, 0), reduceResources(IdSet, ResourceSet) . 
     eq reduceResources (IdSet, (resource(id1, N1, s N2), ResourceSet)) =
     if id1 in IdSet then
         resource(id1, N1, N2), reduceResources(IdSet, ResourceSet)
