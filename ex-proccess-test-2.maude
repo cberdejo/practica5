@@ -1,0 +1,29 @@
+sload bpmn.maude 
+---- bpmn.maude is the name of the file in which the BPMN-SEM module is defined. 
+---- bpmn-no-msgs.maude  is the name of the file with the spec without messages/events
+
+load time
+
+mod BPMN-EX is
+
+	pr BPMN-SEM . ---- module with the semantics of BPMN
+
+	op o : -> Oid .
+	op PROCESS : -> Object .
+	eq PROCESS 
+    = < o : Process | 
+        nodes: (start(id("00"), id("01")),
+                split(id("n1"), parallel, id("01"), (id("02"), id("03"))),
+                merge(id("n2"), parallel, (id("02"), id("03")), id("04")),
+                end(id("05"), id("04"))), 
+        flows: (flow(id("01"), 2),
+                flow(id("02"), 2),
+                flow(id("03"), 3),
+                flow(id("04"), 2)),
+        gtime: 0,
+        tokens: token(id("00"), 0),
+        resources: empty > .
+endm
+
+search PROCESS =>! < o : Process | Atts:AttributeSet > .
+---search [1, 20] PROCESS =>* < o : Process | tokens: empty, Atts:AttributeSet > .
