@@ -9,8 +9,8 @@ mod BPMN-EX is
 	pr BPMN-SEM . ---- module with the semantics of BPMN
 
 	op o : -> Oid .
-	ops PROCESS1 PROCESS2 : -> Object .
-	eq PROCESS1 
+	ops PROCESS PROCESS2 : -> Object .
+	eq PROCESS 
     = < o : Process | 
         nodes: (start(id("00"), id("01")),
                 split(id("n1"), parallel, id("01"), (id("02"), id("03"))),

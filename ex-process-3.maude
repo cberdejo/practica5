@@ -63,7 +63,7 @@ mod BPMN-EX is
                 flow(id("f28"), 2),
                 flow(id("f29"), 2)),
         gtime: 0,
-        tokens: token(id("n00"), 0),
+        tokens: (token(id("n00"), 0)),
         resources: (resource(id("clerk"), 1, 1), 
                     resource(id("worker"), 1, 1), 
                     resource(id("delivery man"), 1, 1), 
@@ -71,8 +71,7 @@ mod BPMN-EX is
                     resource(id("drone"), 1, 1)) > .
 endm
 
----search [2] PROCESS =>! < o : Process | Atts:AttributeSet > .
----search PROCESS =>* < o : Process | tokens: empty, gtime: T:Time,  Atts:AttributeSet > s.t. T:Time < 100 .
 
-search [28] PROCESS =>! < o : Process | gtime: T:Time,  Atts:AttributeSet > s.t. T:Time < 100 .
----search 
+search PROCESS =>* < o : Process | tokens: empty, Atts:AttributeSet > .
+
+---search  PROCESS =>! < o : Process |  Atts:AttributeSet > .
