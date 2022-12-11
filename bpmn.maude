@@ -135,7 +135,7 @@ mod BPMN-SEM is
     op tokenSetInIdIsReady : Set{Id} Set{Token} -> Bool .
     eq tokenSetInIdIsReady (IdSet, empty) = true .
     eq tokenSetInIdIsReady ((id1, IdSet), TokenSet) = 
-        if id1 in  TokenSet then 
+        if id1 in TokenSet then 
             tokenSetInIdIsReady(IdSet, TokenSet) 
         else 
             false ---todos los ids deben tener un Token correspondienote, si no falso.
@@ -143,6 +143,9 @@ mod BPMN-SEM is
     
     ---prueba: 
 
+    op isNotEmpty : Set{Token} -> Bool .
+    eq isNotEmpty (empty) = false .
+    eq isNotEmpty (token(id1, T1), TokenSet) = tokenTimeIsZero(token(id1, T1), TokenSet) .
     
     --- comprueba que todos los tokens en un IdSet que se pasan tienen tiempo a 0
     op tokenTimeIsZero : Set{Id} Set{Token} -> Bool .
@@ -150,8 +153,9 @@ mod BPMN-SEM is
     eq tokenTimeIsZero ((id1,IdSet), (token(id1, 0), TokenSet)) = tokenTimeIsZero(IdSet,TokenSet) .
     eq tokenTimeIsZero (IdSet, TokenSet) = false [owise] .
     ---prueba:
-
+    ---red tokenTimeIsZero ((id("01"), id("00"), id("02")), empty) .
     ---Debe eliminarse todos los tokens menos que pertenezcan al IdSet
+    
     op deleteTokensInIdSet : Set{Token} Set{Id} -> Set{Token} .
     eq deleteTokensInIdSet (empty, IdSet) = empty .
     eq deleteTokensInIdSet ((token(id1, T1), TokenSet), IdSet) = 
@@ -239,14 +243,14 @@ mod BPMN-SEM is
     eq maximumTimeToken (T1, (TokenSet), (id1,IdSet)) = INF [owise] .
 
     op mte : Set{Token} Set{Node} Set{Resource} -> TimeInf .
-   
+   ---caso base
     eq mte (empty, NodeSet, ResourceSet) = INF .
 
     eq mte ((token(id1,T1), TokenSet), (merge(id2, parallel, (id1, IdSet), id3), NodeSet), ResourceSet) =
-         minimum(maximumTimeToken(T1, TokenSet, IdSet), mte(deleteTokensInIdSet(TokenSet, IdSet ), NodeSet, ResourceSet)) .
+        minimum(maximumTimeToken(T1, TokenSet, IdSet), mte(deleteTokensInIdSet(TokenSet, IdSet ), NodeSet, ResourceSet)) .
    
-    ceq mte ((token(id1,T1), TokenSet), (task(id1, S, id2, id3, T2, IdSet), NodeSet),  ResourceSet) =
-         mte(TokenSet, NodeSet, ResourceSet) if not hasAvailableResources(IdSet, ResourceSet) .
+    ceq mte ((token(id2,T1), TokenSet), (task(id1, S, id2, id3, T2, IdSet), NodeSet),  ResourceSet) =
+        mte(TokenSet, NodeSet, ResourceSet) if not hasAvailableResources(IdSet, ResourceSet) .
     
     eq mte ((token(id1,T1), TokenSet), NodeSet, ResourceSet) = minimum(T1, mte (TokenSet, NodeSet, ResourceSet)) [owise] .
 
@@ -295,11 +299,11 @@ mod BPMN-SEM is
     if id3 in IdSet .
 
     --- and input
-    crl [ParallelMerge] : < O : Process | nodes: (merge(id1, parallel, IdSet, id4), NodeSet), 
-		flows: (flow(id4, T2), FlowSet), tokens: (TokenSet), gtime: T3, resources: ResourceSet > 
+    crl [ParallelMerge] : < O : Process | nodes: (merge(id1, parallel, (id2, IdSet), id4), NodeSet), 
+		flows: (flow(id4, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
 	=> < O : Process | nodes: (merge(id1, parallel, IdSet, id4), NodeSet), 
-		flows: (flow(id4, T2), FlowSet), tokens: (token(id4, T2), deleteTokensInIdSet(TokenSet, IdSet)), gtime: T3, resources: ResourceSet > 
-    if tokenTimeIsZero(IdSet,TokenSet) . 
+		flows: (flow(id4, T2), FlowSet), tokens: (token(id4, T2), deleteTokensInIdSet(TokenSet, IdSet)), gtime: T3, resources: ResourceSet, Atts > 
+    if tokenTimeIsZero(IdSet, TokenSet) .
 
         ---and output
     rl [ParallelSplit] : < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
