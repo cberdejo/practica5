@@ -120,33 +120,6 @@ mod BPMN-SEM is
   ---MERGE PARALLEL
 ***************************************************************************************************************************************
 
---- and input
-    crl [ParallelMerge] : < O : Process | nodes: (merge(id1, parallel, IdSet, id4), NodeSet), 
-		flows: (flow(id4, T2), FlowSet), tokens: (TokenSet), gtime: T3, resources: ResourceSet > 
-	=> < O : Process | nodes: (merge(id1, parallel, IdSet, id4), NodeSet), 
-		flows: (flow(id4, T2), FlowSet), tokens: (token(id4, T2), deleteTokensInIdSet(TokenSet, IdSet)), gtime: T3, resources: ResourceSet > 
-    if tokenSetInIdIsReady(IdSet, TokenSet) . 
-
-    op _in_ : Id Set{Token} -> Bool . 
-    eq id1 in (token(id1,T1), TokenSet) = true .
-    eq id1 in TokenSet = false [owise] .
-    
-  ---comprueba que el los IdSet
-    op tokenSetInIdIsReady : Set{Id} Set{Token} -> Bool .
-    eq tokenSetInIdIsReady (IdSet, empty) = true .
-    eq tokenSetInIdIsReady ((id1, IdSet), TokenSet) = 
-        if id1 in TokenSet then 
-            tokenSetInIdIsReady(IdSet, TokenSet) 
-        else 
-            false ---todos los ids deben tener un Token correspondienote, si no falso.
-        fi .
-    
-    ---prueba: 
-
-    op isNotEmpty : Set{Token} -> Bool .
-    eq isNotEmpty (empty) = false .
-    eq isNotEmpty (token(id1, T1), TokenSet) = tokenTimeIsZero(token(id1, T1), TokenSet) .
-    
     --- comprueba que todos los tokens en un IdSet que se pasan tienen tiempo a 0
     op tokenTimeIsZero : Set{Id} Set{Token} -> Bool .
     eq tokenTimeIsZero (IdSet, empty) = true .
@@ -154,8 +127,8 @@ mod BPMN-SEM is
     eq tokenTimeIsZero (IdSet, TokenSet) = false [owise] .
     ---prueba:
     ---red tokenTimeIsZero ((id("01"), id("00"), id("02")), empty) .
+
     ---Debe eliminarse todos los tokens menos que pertenezcan al IdSet
-    
     op deleteTokensInIdSet : Set{Token} Set{Id} -> Set{Token} .
     eq deleteTokensInIdSet (empty, IdSet) = empty .
     eq deleteTokensInIdSet ((token(id1, T1), TokenSet), IdSet) = 
@@ -184,8 +157,6 @@ mod BPMN-SEM is
     eq tokenParaCadaFlow ((id1, IdSet), FlowSet) = token(id1, findTimeFromFlowSet(FlowSet, id1)), tokenParaCadaFlow(IdSet, FlowSet) .
 
    ---prueba red tokenParaCadaFlow((id("00"), id("01"), id("02")), (flow(id("00"), 15), flow(id("01"), 20), flow(id("02"), 30), flow(id("04"), 30))) .
-
-
 
 
  ***************************************************************************************************************************************
@@ -298,10 +269,10 @@ mod BPMN-SEM is
 		flows: (flow(id2, T1), flow(id3, T2), FlowSet), tokens: (token(id3, T2), TokenSet), gtime: T3, resources: ResourceSet > 
     if id3 in IdSet .
 
-    --- and input
+        --- and input
     crl [ParallelMerge] : < O : Process | nodes: (merge(id1, parallel, (id2, IdSet), id4), NodeSet), 
 		flows: (flow(id4, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
-	=> < O : Process | nodes: (merge(id1, parallel, IdSet, id4), NodeSet), 
+	=> < O : Process | nodes: (merge(id1, parallel, (id2, IdSet), id4), NodeSet), 
 		flows: (flow(id4, T2), FlowSet), tokens: (token(id4, T2), deleteTokensInIdSet(TokenSet, IdSet)), gtime: T3, resources: ResourceSet, Atts > 
     if tokenTimeIsZero(IdSet, TokenSet) .
 
@@ -311,6 +282,4 @@ mod BPMN-SEM is
 	=> < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
 		flows: (flow(id2, T1), FlowSet), tokens: (tokenParaCadaFlow(IdSet,FlowSet), TokenSet), gtime: T3, resources: ResourceSet > .
     
-
-
 endm 

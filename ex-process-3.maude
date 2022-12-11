@@ -71,6 +71,8 @@ mod BPMN-EX is
                     resource(id("drone"), 1, 1)) > .
 endm
 
-search [1] PROCESS =>! < o : Process | Atts:AttributeSet > .
----search [1, 30] PROCESS =>* < o : Process | tokens: token(id("f14"), T:Time) , Atts:AttributeSet > .
-                    
+---search [2] PROCESS =>! < o : Process | Atts:AttributeSet > .
+---search PROCESS =>* < o : Process | tokens: empty, gtime: T:Time,  Atts:AttributeSet > s.t. T:Time < 100 .
+
+search [28] PROCESS =>! < o : Process | gtime: T:Time,  Atts:AttributeSet > s.t. T:Time < 100 .
+---search 

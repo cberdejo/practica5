@@ -1,4 +1,4 @@
-sload bpmn.maude 
+sload bpmn
 ---- bpmn.maude is the name of the file in which the BPMN-SEM module is defined. 
 ---- bpmn-no-msgs.maude  is the name of the file with the spec without messages/events
 
@@ -39,6 +39,6 @@ mod BPMN-EX is
         resources: empty > .
 endm
 
----search PROCESS2 =>! < o : Process | Atts:AttributeSet > .
+search PROCESS =>! < o : Process | Atts:AttributeSet > .
 ---search [2, 20] PROCESS2 =>* < o : Process | tokens: empty, Atts:AttributeSet > .
-rew[1] PROCESS2 .
+---rew[1] PROCESS2 .
