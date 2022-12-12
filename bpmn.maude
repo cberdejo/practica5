@@ -282,3 +282,7 @@ mod BPMN-SEM is
 		flows: (flow(id2, T1), FlowSet), tokens: (tokenParaCadaFlow(IdSet,FlowSet), TokenSet), gtime: T3, resources: ResourceSet, Atts > .
     
 endm 
+
+---Comandos:
+---search PROCESS =>* < o : Process | tokens: empty, Atts:AttributeSet > .
+---search  PROCESS =>! < o : Process |  Atts:AttributeSet > .
