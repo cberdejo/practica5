@@ -238,16 +238,16 @@ mod BPMN-SEM is
 
 	***token temporizador a 0, falta comprobar tiene el conjunto de recursos disponible (crl)
 	crl [enterTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
-		flows: (flow(id2, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id2, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
 	=> < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
-		flows: (flow(id2, T2), FlowSet), tokens: (token(id1, T1), TokenSet), gtime: T3, resources: reduceResources(IdSet, ResourceSet) >
+		flows: (flow(id2, T2), FlowSet), tokens: (token(id1, T1), TokenSet), gtime: T3, resources: reduceResources(IdSet, ResourceSet), Atts >
         if hasAvailableResources(IdSet, ResourceSet) .
 
     *** Hace falta liberar los recursos cuando se sale de la tarea
 	rl [enterFlowFromTask] : < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
-		flows: (flow(id3, T2), FlowSet), tokens: (token(id1, 0), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id3, T2), FlowSet), tokens: (token(id1, 0), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
 	=> < O : Process | nodes: (task(id1, TaskName, id2, id3, T1, IdSet), NodeSet), 
-		flows: (flow(id3, T2), FlowSet), tokens: (token(id3, T2), TokenSet), gtime: T3, resources: addResources(IdSet, ResourceSet) > .
+		flows: (flow(id3, T2), FlowSet), tokens: (token(id3, T2), TokenSet), gtime: T3, resources: addResources(IdSet, ResourceSet), Atts > .
 
   	rl [enterEnd] : < O : Process | nodes: (end(id1, id2), NodeSet), 
 		flows: (flow(id2, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, Atts > 
@@ -256,16 +256,16 @@ mod BPMN-SEM is
 
     --- Or with multiple inputs
     crl [ExclusiveMerge] : < O : Process | nodes: (merge(id1, exclusive, IdSet, id4), NodeSet), 
-		flows: (flow(id2, T1), flow(id4, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id2, T1), flow(id4, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
 	=> < O : Process | nodes: (merge(id1, exclusive, IdSet, id4), NodeSet), 
-		flows: (flow(id2, T1), flow(id4, T2), FlowSet), tokens: (token(id4, T2), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id2, T1), flow(id4, T2), FlowSet), tokens: (token(id4, T2), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
     if id2 in IdSet .
 
     --- Or with multiple outputs
     crl [ExclusiveSplit] : < O : Process | nodes: (split(id1, exclusive, id2, IdSet), NodeSet), 
-		flows: (flow(id2, T1), flow(id3, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id2, T1), flow(id3, T2), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
 	=> < O : Process | nodes: (split(id1, exclusive, id2, IdSet), NodeSet), 
-		flows: (flow(id2, T1), flow(id3, T2), FlowSet), tokens: (token(id3, T2), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id2, T1), flow(id3, T2), FlowSet), tokens: (token(id3, T2), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
     if id3 in IdSet .
 
         --- and input
@@ -277,8 +277,8 @@ mod BPMN-SEM is
 
         ---and output
     rl [ParallelSplit] : < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
-		flows: (flow(id2, T1), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet > 
+		flows: (flow(id2, T1), FlowSet), tokens: (token(id2, 0), TokenSet), gtime: T3, resources: ResourceSet, Atts > 
 	=> < O : Process | nodes: (split(id1, parallel, id2, IdSet), NodeSet), 
-		flows: (flow(id2, T1), FlowSet), tokens: (tokenParaCadaFlow(IdSet,FlowSet), TokenSet), gtime: T3, resources: ResourceSet > .
+		flows: (flow(id2, T1), FlowSet), tokens: (tokenParaCadaFlow(IdSet,FlowSet), TokenSet), gtime: T3, resources: ResourceSet, Atts > .
     
 endm 
